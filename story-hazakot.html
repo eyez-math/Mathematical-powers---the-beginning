@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הסיפור מאחורי החזקות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF2F9;
+    --card:#ffffff;
+    --blue-deep:#1B3A6B;
+    --blue-primary:#2E5FA3;
+    --blue-soft:#DCE7F7;
+    --orange:#F2941F;
+    --orange-soft:#FCE9D2;
+    --gray-step:#CBD5E3;
+    --text-dark:#1F2A3D;
+    --text-muted:#5B6B82;
+    --green:#2E9E5B;
+    --green-soft:#DFF3E6;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --shadow-card:0 10px 30px rgba(27,58,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    font-family:'Heebo',sans-serif;
+    color:var(--text-dark);
+    min-height:100vh;
+  }
+  .katex{direction:ltr !important; unicode-bidi:isolate !important;}
+  .ltr-num{direction:ltr; unicode-bidi:isolate; display:inline-block;}
+
+  .app-header{
+    position:sticky; top:0; z-index:20; background:var(--card);
+    box-shadow:0 2px 10px rgba(27,58,107,0.06);
+    padding:16px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .app-header h1{font-size:1.3rem; font-weight:800; color:var(--blue-deep); margin:0;}
+  .mode-toggle{display:flex; gap:6px; background:var(--bg); border-radius:12px; padding:4px;}
+  .mode-btn{
+    border:none; background:transparent; padding:9px 16px; border-radius:9px; font-family:'Heebo',sans-serif;
+    font-weight:700; font-size:.88rem; cursor:pointer; color:var(--text-muted); transition:all .15s ease;
+  }
+  .mode-btn.active{background:var(--blue-primary); color:#fff; box-shadow:0 3px 10px rgba(46,95,163,.3);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 18px 60px;}
+  #studentWrap{max-width:860px;margin:0 auto}
+
+  /* ---------- student scroll mode ---------- */
+  .story-section{
+    background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-card);
+    padding:32px 28px; margin-bottom:22px;
+  }
+  .story-section .sec-tag{
+    display:inline-block; background:var(--blue-soft); color:var(--blue-primary); font-weight:800;
+    font-size:.78rem; padding:5px 14px; border-radius:20px; margin-bottom:14px;
+  }
+  .story-section h2{font-size:1.55rem; color:var(--blue-deep); margin:0 0 16px; font-weight:800;}
+  .story-section p{font-size:1.08rem; line-height:1.85; margin:0 0 14px; color:var(--text-dark);}
+  .story-section p:last-child{margin-bottom:0;}
+  .hook-question{
+    background:var(--orange-soft); border-radius:16px; padding:22px 20px; text-align:center;
+    font-size:1.25rem; font-weight:700; color:var(--text-dark); margin-top:10px;
+  }
+  .fact-box{
+    background:var(--blue-soft); border-radius:14px; padding:18px 20px; margin:16px 0;
+    font-size:1.02rem; line-height:1.7;
+  }
+  .fact-box b{color:var(--blue-deep);}
+  .reveal-box{
+    background:var(--bg); border:2px dashed var(--gray-step); border-radius:14px; padding:18px 20px; margin-top:14px; text-align:center;
+  }
+  .reveal-btn{
+    background:var(--blue-primary); color:#fff; border:none; border-radius:12px; padding:12px 24px;
+    font-family:'Heebo',sans-serif; font-weight:700; font-size:1rem; cursor:pointer;
+  }
+  .reveal-btn:hover{background:var(--blue-deep);}
+  .reveal-content{display:none; margin-top:16px; text-align:right;}
+  .reveal-content.shown{display:block;}
+  .big-number{
+    font-size:1.7rem; font-weight:900; color:var(--blue-deep); text-align:center; margin:10px 0;
+    direction:ltr; unicode-bidi:isolate;
+  }
+  .timeline{display:flex; flex-direction:column; gap:18px; margin-top:6px;}
+  .timeline-item{display:grid; grid-template-columns:128px 1fr; gap:18px; align-items:stretch; background:linear-gradient(135deg,#f8faff,#eef3fb); border:1px solid #e1e8f2; border-radius:18px; padding:16px;}
+  .timeline-meta{display:flex; flex-direction:column; align-items:center; gap:8px; flex:0 0 96px;}
+  .timeline-icon{
+    width:100%; height:92px; border-radius:14px; background:var(--bg);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .timeline-icon svg{width:76px;height:76px;}
+  .timeline-item:nth-child(1) .timeline-icon{background:url('assets/history-babylon.webp') center/cover}
+  .timeline-item:nth-child(2) .timeline-icon{background:url('assets/history-archimedes.webp') center/cover}
+  .timeline-item:nth-child(3) .timeline-icon{background:url('assets/history-descartes.webp') center/cover}
+  .timeline-icon svg{display:none}
+  .timeline-body{align-self:center;line-height:1.75;}
+  .timeline-year{
+    flex:0 0 auto; min-width:96px; text-align:center; background:var(--orange); color:#fff;
+    font-weight:800; font-size:.85rem; border-radius:10px; padding:8px 6px; direction:ltr;
+  }
+  .timeline-body b{color:var(--blue-deep);}
+  .life-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px;}
+  .life-card{background:var(--bg); border:2px solid transparent; border-radius:18px; padding:0; text-align:right; overflow:hidden; transition:.2s ease;}
+  .life-card:hover,.life-card.active{transform:translateY(-3px);border-color:var(--blue-primary);box-shadow:0 10px 24px rgba(27,58,107,.12)}
+  .life-visual{height:132px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dce7f7,#fff);overflow:hidden}
+  .life-visual svg{width:100%;height:100%}
+  .life-visual img,.scenario-mini img{width:100%;height:100%;object-fit:cover;display:block}
+  .story-image{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:18px;display:block;margin:4px 0 22px;box-shadow:0 12px 28px rgba(27,58,107,.16)}
+  .timeline-photo{width:100%;height:92px;object-fit:cover;border-radius:14px;display:block}
+  .life-copy{padding:16px}
+  .life-card .t{font-weight:800; color:var(--blue-deep); margin-bottom:4px; font-size:.98rem;}
+  .life-card .d{font-size:.88rem; color:var(--text-muted); line-height:1.5;}
+  button.life-card{font-family:inherit;cursor:pointer;color:inherit;width:100%}
+  .scenario-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+  .scenario-tab{border:2px solid #dbe3ee;background:#fff;border-radius:14px;padding:12px 8px;font-family:inherit;font-weight:800;color:var(--blue-deep);cursor:pointer}
+  .scenario-tab.active{background:var(--blue-primary);border-color:var(--blue-primary);color:#fff}
+  .scenario-stage{background:linear-gradient(135deg,#f7faff,#edf3fb);border-radius:18px;padding:20px;margin-top:12px}
+  .scenario-head{display:flex;gap:18px;align-items:center;margin-bottom:14px}
+  .scenario-mini{width:110px;height:82px;border-radius:14px;overflow:hidden;flex:0 0 auto;background:#fff}
+  .scenario-mini svg{width:100%;height:100%}
+  .scenario-title{font-size:1.25rem;font-weight:900;color:var(--blue-deep)}
+  .formula-pill{display:inline-block;background:#fff;border:1px solid #dce5f0;border-radius:999px;padding:7px 14px;margin-top:6px;font-weight:700;direction:ltr}
+  .chart-shell{background:#fff;border:1px solid #dfe6ef;border-radius:16px;padding:12px;margin-top:14px}
+  .scale-toggle{display:flex;justify-content:center;gap:8px;margin:8px 0 2px}
+  .scale-btn{border:1px solid #cdd8e6;background:#fff;color:var(--blue-primary);border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;cursor:pointer}
+  .scale-btn.active{background:var(--blue-primary);color:#fff}
+  .choice-card{cursor:pointer;transition:.2s ease;position:relative;overflow:hidden}
+  .choice-card::before{content:'';display:block;height:8px;margin:-18px -18px 14px;background:var(--gray-step)}
+  .choice-card[data-choice="a"]::before{background:var(--orange)}
+  .choice-card[data-choice="b"]::before{background:var(--blue-primary)}
+  .choice-card.selected{border-color:var(--blue-primary);box-shadow:0 8px 20px rgba(46,95,163,.15)}
+  .choice-feedback{text-align:center;min-height:28px;font-weight:800;color:var(--blue-deep)}
+
+  /* chessboard doubling visual */
+  .chess-board{
+    display:grid; grid-template-columns:repeat(8, 1fr); gap:4px; max-width:640px; width:100%; margin:18px auto;
+    background:var(--blue-deep); padding:6px; border-radius:12px;
+  }
+  .chess-cell{
+    aspect-ratio:1; border-radius:5px; display:flex; align-items:center; justify-content:center;
+    font-weight:800; color:var(--text-dark); direction:ltr; overflow:hidden; padding:2px;
+  }
+  .chess-cell .katex{font-size:1.05rem !important;}
+  .chess-cell.light{background:#F3EEE3;}
+  .chess-cell.dark{background:#D8CBAE;}
+  .chess-cell.filled{color:#fff;}
+  .chess-cell.filled.light{background:var(--blue-primary);}
+  .chess-cell.filled.dark{background:var(--blue-deep);}
+  .chess-cell.filled .katex{color:#fff !important;}
+  .chess-cell.current{outline:4px solid var(--orange); outline-offset:-4px;}
+  .chess-controls{display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:14px;}
+  .chess-controls button{
+    background:var(--blue-soft); color:var(--blue-primary); border:none; border-radius:10px;
+    padding:10px 16px; font-family:'Heebo',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer;
+  }
+  .chess-controls button:hover{background:var(--blue-primary); color:#fff;}
+  .chess-controls button:disabled{opacity:.4; cursor:not-allowed;}
+  .chess-readout{text-align:center; margin-top:14px;}
+  .chess-readout .cur-sq{font-size:.95rem; color:var(--text-muted); margin-bottom:4px;}
+  .chess-readout .cur-val{font-size:1.5rem; font-weight:900; color:var(--orange); direction:ltr; unicode-bidi:isolate;}
+  .chess-readout .cur-total{font-size:1.05rem; color:var(--blue-deep); font-weight:700; margin-top:8px; direction:ltr; unicode-bidi:isolate;}
+
+  /* compare chart */
+  .compare-choice{display:flex; gap:14px; justify-content:center; margin:16px 0; flex-wrap:wrap;}
+  .choice-card{
+    flex:1; min-width:200px; max-width:260px; background:var(--bg); border:2px solid var(--gray-step);
+    border-radius:14px; padding:18px; text-align:center;
+  }
+  .choice-card .ct{font-weight:800; color:var(--blue-deep); margin-bottom:6px;}
+  .choice-card .cd{font-size:.9rem; color:var(--text-muted);}
+  #chartSvg{width:100%; height:auto; margin-top:10px;}
+  .chart-dot{cursor:pointer;}
+  .chart-tooltip{
+    position:fixed; pointer-events:none; background:var(--blue-deep); color:#fff; padding:7px 12px; border-radius:9px;
+    font-size:.85rem; font-weight:700; white-space:nowrap; transform:translate(-50%,-125%); z-index:60; display:none;
+    direction:rtl; box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  .slider-row{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .slider-row .slabel{display:flex; justify-content:space-between; font-weight:700; color:var(--blue-deep); font-size:.95rem;}
+  .slider-row .slabel .sval{color:var(--orange); direction:ltr; unicode-bidi:isolate;}
+  .slider-row input[type=range]{width:100%; accent-color:var(--blue-primary);}
+  .interest-result{
+    text-align:center; background:var(--green-soft); border-radius:14px; padding:16px; margin:16px 0;
+    font-size:1.15rem; font-weight:800; color:var(--green); direction:ltr; unicode-bidi:isolate;
+  }
+
+  .closing-note{text-align:center; color:var(--text-muted); font-size:1rem; margin-top:6px;}
+
+  /* ---------- teacher presenter mode ---------- */
+  .presenter-wrap{display:none;}
+  .presenter-wrap.active{display:block;}
+  .presenter-slide{
+    background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-card);
+    padding:52px 44px; min-height:56vh; display:flex; flex-direction:column; justify-content:center;
+  }
+  .presenter-slide .student-detail{display:none}
+  .presenter-slide>p{display:none}
+  .presenter-slide .timeline{display:grid;grid-template-columns:repeat(3,1fr)}
+  .presenter-slide .timeline-item{grid-template-columns:1fr;padding:14px}
+  .presenter-slide .timeline-meta{width:100%;flex-basis:auto}
+  .presenter-slide .timeline-body{font-size:1rem;line-height:1.55;text-align:center}
+  .presenter-slide .life-grid{grid-template-columns:repeat(4,1fr)}
+  .presenter-slide .life-visual{height:150px}
+  .presenter-slide .life-card .d{display:none}
+  .presenter-slide .scenario-stage{padding:14px}
+  .presenter-slide .sec-tag{align-self:flex-start;}
+  .presenter-slide h2{font-size:2.3rem; margin-bottom:22px;}
+  .presenter-slide p{font-size:1.4rem; line-height:1.9;}
+  .presenter-slide .hook-question{font-size:1.6rem;}
+  .presenter-slide .fact-box{font-size:1.25rem;}
+  .presenter-slide .big-number{font-size:2.3rem;}
+  .presenter-slide .timeline-body{font-size:1.15rem;}
+  .presenter-slide .life-card .t{font-size:1.1rem;}
+  .presenter-slide .life-card .d{font-size:1rem;}
+  .presenter-nav{
+    display:flex; align-items:center; justify-content:center; gap:22px; margin-top:22px;
+  }
+  .presenter-nav button{
+    background:var(--blue-soft); color:var(--blue-primary); border:none; border-radius:50%;
+    width:52px; height:52px; font-size:1.4rem; cursor:pointer; font-weight:700;
+  }
+  .presenter-nav button:disabled{opacity:.35; cursor:not-allowed;}
+  .presenter-nav span{font-weight:700; color:var(--text-muted); min-width:90px; text-align:center;}
+  .presenter-dots{display:flex; justify-content:center; gap:7px; margin-top:16px;}
+  .presenter-dots .dot{width:9px; height:9px; border-radius:50%; background:var(--gray-step);}
+  .presenter-dots .dot.on{background:var(--blue-primary);}
+
+  @media (max-width:600px){
+    .life-grid{grid-template-columns:1fr;}
+    .chess-cell .katex{font-size:.62rem !important;}
+    .presenter-slide{padding:30px 20px;}
+    .presenter-slide h2{font-size:1.7rem;}
+    .presenter-slide p{font-size:1.1rem;}
+    .presenter-slide .big-number{font-size:1.6rem;}
+    .timeline-item{grid-template-columns:92px 1fr;padding:12px}
+    .scenario-tabs{grid-template-columns:1fr 1fr}
+    .scenario-head{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>הסיפור מאחורי החזקות</h1>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnStudent">למידה עצמאית</button>
+    <button class="mode-btn" id="btnTeacher">הצגה למורה</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="studentWrap"></div>
+  <div class="presenter-wrap" id="presenterWrap">
+    <div id="presenterSlide"></div>
+    <div class="presenter-nav">
+      <button id="prevSlide">▶</button>
+      <span id="slideCounter"></span>
+      <button id="nextSlide">◀</button>
+    </div>
+    <div class="presenter-dots" id="presenterDots"></div>
+  </div>
+</div>
+
+<script>
+let katexAvailable = false;
+function cleanLatexFallback(latex){
+  return String(latex==null?'':latex)
+    .replace(/\\times/g,'×').replace(/\\cdot/g,'·').replace(/\\div/g,'÷')
+    .replace(/\\text\{([^}]*)\}/g,'$1')
+    .replace(/\^\{([^}]*)\}/g,'^$1')
+    .replace(/_\{([^}]*)\}/g,'_$1')
+    .replace(/\\underbrace/g,'')
+    .replace(/[{}]/g,'')
+    .replace(/\\/g,'');
+}
+function katexSpan(latex, displayMode){
+  if(katexAvailable){
+    try{ return katex.renderToString(latex, {throwOnError:false, displayMode:!!displayMode}); }
+    catch(e){ return cleanLatexFallback(latex); }
+  }
+  return `<span class="ltr-num">${cleanLatexFallback(latex)}</span>`;
+}
+function waitForKatex(timeoutMs){
+  return new Promise(resolve=>{
+    if(window.katex){ resolve(true); return; }
+    const start = Date.now();
+    const iv = setInterval(()=>{
+      if(window.katex){ clearInterval(iv); resolve(true); }
+      else if(Date.now()-start > timeoutMs){ clearInterval(iv); resolve(false); }
+    }, 50);
+  });
+}
+
+/* ---------- content ---------- */
+let SECTIONS = [];
+function visualSvg(type){
+  const assets={cells:'reality-cell-division.webp',money:'reality-compound-interest.webp',memory:'reality-computer-memory.webp',viral:'reality-viral-sharing.webp'};
+  if(assets[type]) return `<img src="assets/${assets[type]}" alt="" loading="lazy">`;
+  const common='viewBox="0 0 240 130" role="img" aria-hidden="true"';
+  if(type==='cells') return `<svg ${common}><defs><radialGradient id="cg"><stop stop-color="#72d7a2"/><stop offset="1" stop-color="#2e9e5b"/></radialGradient></defs><rect width="240" height="130" fill="#e8f7ef"/><path d="M0 104 C45 73 75 124 120 89 S190 62 240 90 V130 H0Z" fill="#cdeedc"/><g fill="url(#cg)" stroke="#fff" stroke-width="4"><circle cx="48" cy="63" r="24"/><circle cx="109" cy="44" r="19"/><circle cx="145" cy="75" r="20"/><circle cx="193" cy="47" r="15"/><circle cx="205" cy="91" r="12"/></g><g fill="#dff8ea"><circle cx="41" cy="56" r="6"/><circle cx="103" cy="39" r="5"/><circle cx="139" cy="69" r="5"/></g></svg>`;
+  if(type==='money') return `<svg ${common}><rect width="240" height="130" fill="#fff4de"/><path d="M25 106H220" stroke="#d7b36c" stroke-width="4"/><g fill="#f3b64c"><rect x="30" y="83" width="29" height="23" rx="4"/><rect x="70" y="68" width="29" height="38" rx="4"/><rect x="110" y="49" width="29" height="57" rx="4"/><rect x="150" y="25" width="29" height="81" rx="4"/></g><path d="M35 76 Q93 70 125 43 T208 18" fill="none" stroke="#2e9e5b" stroke-width="6" stroke-linecap="round"/><path d="M192 16l18 1-7 16" fill="none" stroke="#2e9e5b" stroke-width="6"/><circle cx="74" cy="33" r="17" fill="#fff" stroke="#f2941f" stroke-width="4"/><text x="74" y="40" text-anchor="middle" font-size="20" font-weight="900" fill="#d47a00">₪</text></svg>`;
+  if(type==='memory') return `<svg ${common}><rect width="240" height="130" fill="#e9effb"/><rect x="42" y="27" width="156" height="77" rx="10" fill="#223b69"/><g fill="#79a9ee">${Array.from({length:16},(_,i)=>`<rect x="${58+(i%8)*17}" y="${42+Math.floor(i/8)*28}" width="11" height="18" rx="2"/>`).join('')}</g><g stroke="#f2c14e" stroke-width="4">${Array.from({length:10},(_,i)=>`<path d="M${56+i*14} 104v14"/>`).join('')}</g><text x="120" y="94" text-anchor="middle" font-size="15" fill="#fff" font-weight="800">2¹⁰</text></svg>`;
+  return `<svg ${common}><rect width="240" height="130" fill="#f1eaff"/><g fill="#fff" stroke="#7654b8" stroke-width="3"><circle cx="120" cy="65" r="20"/><circle cx="45" cy="32" r="14"/><circle cx="45" cy="99" r="14"/><circle cx="195" cy="25" r="14"/><circle cx="202" cy="100" r="14"/></g><g stroke="#a17de0" stroke-width="4"><path d="M102 56L58 37M102 74L59 94M138 55L182 31M139 75L188 95"/></g><g fill="#7654b8"><circle cx="120" cy="59" r="5"/><path d="M109 76q11-12 22 0"/><circle cx="45" cy="28" r="4"/><circle cx="195" cy="21" r="4"/></g></svg>`;
+}
+function lifeCard(type,title,desc){
+  return `<button class="life-card" data-scenario="${type}"><div class="life-visual">${visualSvg(type)}</div><div class="life-copy"><div class="t">${title}</div><div class="d">${desc}</div></div></button>`;
+}
+function buildSections(){ return [
+  {
+    tag:'לפני שמתחילים',
+    title:'שאלה שנשמעת פשוטה מדי',
+    html: `
+      <p>תארו לעצמכם לוח שחמט רגיל — 64 משבצות. שמים <b>גרגיר חיטה אחד</b> על המשבצת הראשונה. על המשבצת השנייה — <b>שניים</b>. על השלישית — <b>ארבעה</b>. כל משבצת מכפילה פי 2 את הקודמת.</p>
+      <div class="hook-question">
+        כמה גרגירי חיטה יהיו על המשבצת ה-64, האחרונה? ומה יהיה הסכום הכולל של כל הלוח?<br>
+        <span style="font-size:.9rem; color:var(--text-muted); font-weight:500;">נסו לנחש לפני שממשיכים.</span>
+      </div>
+    `
+  },
+  {
+    tag:'סיפור עתיק',
+    title:'האגדה ההודית',
+    html: `
+      <img class="story-image" src="assets/story-chess-wheat.webp" alt="חכם מציג למלך לוח שחמט שעליו כמויות חיטה ההולכות וגדלות">
+      <p>יש אגדה עתיקה — קיימות ממנה כמה גרסאות, אבל הרעיון תמיד דומה — על חכם שהמציא את משחק השחמט והביא אותו למלך. המלך התרשם כל כך שהציע לחכם כל פרס שירצה.</p>
+      <p>החכם ביקש דבר שנשמע <b>צנוע מאוד</b>: "שימו גרגיר חיטה אחד על המשבצת הראשונה של הלוח, ובכל משבצת הבאה — כפול מהקודמת. זה כל מה שאני מבקש."</p>
+      <p>המלך צחק. זה נשמע כמו כלום. הוא הורה למשרתיו למלא את הבקשה בקלות...</p>
+      <p style="text-align:center; color:var(--text-muted); font-size:.95rem;">לחצו על "המשבצת הבאה" ובנו את הלוח בעצמכם, משבצת-משבצת:</p>
+      <div class="chess-board" id="chessBoard"></div>
+      <div class="chess-readout">
+        <div class="cur-sq" id="chessCurSq">עוד לא התחלנו</div>
+        <div class="cur-val" id="chessCurVal"></div>
+        <div class="cur-total" id="chessCurTotal"></div>
+      </div>
+      <div class="chess-controls">
+        <button id="chessBack">▶ אחורה</button>
+        <button id="chessNext">המשבצת הבאה ◀</button>
+        <button id="chessJump">קפצו למשבצת 64 ◀◀</button>
+        <button id="chessReset">איפוס</button>
+      </div>
+    `
+  },
+  {
+    tag:'הגילוי',
+    title:'למה המלך הפסיק לצחוק',
+    html: `
+      <p>ככל שהמשרתים התקדמו על הלוח, הם גילו שהמספרים גדלים הרבה יותר מהר ממה שדמיינו. הכפלה פשוטה, שוב ושוב, הופכת למשהו שאי אפשר להכיל.</p>
+      <div class="reveal-box">
+        <button class="reveal-btn" id="revealTotal">גלו כמה חיטה זה באמת</button>
+        <div class="reveal-content" id="revealTotalContent">
+          <div class="big-number">${katexSpan('2^{64}-1 = 18{,}446{,}744{,}073{,}709{,}551{,}615')}</div>
+          <p>יותר מ-18 קווינטיליון גרגירי חיטה. זה מספר גדול יותר מכל כמות החיטה שגדלה אי פעם על פני כדור הארץ, בכל ההיסטוריה האנושית כולה — מלוח שחמט אחד, ורק כי הכפלנו מספר שוב ושוב.</p>
+        </div>
+      </div>
+      <p style="margin-top:18px;">זה בדיוק הלקח שחזקות מלמדות אותנו: <b>האינטואיציה שלנו רגילה לגדילה ליניארית</b> (להוסיף עוד קצת בכל פעם) — אבל גדילה מעריכית (להכפיל בכל פעם) מתנהגת אחרת לגמרי, ובסוף עוקפת כל דבר בפער עצום.</p>
+    `
+  },
+  {
+    tag:'היסטוריה אמיתית',
+    title:'מי המציא את החזקות, באמת?',
+    html: `
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-meta">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 48 48" width="32" height="32">
+                <rect x="6" y="10" width="36" height="28" rx="4" fill="#D8CBAE"/>
+                <line x1="12" y1="18" x2="20" y2="18" stroke="#8a6d3b" stroke-width="2"/>
+                <line x1="24" y1="18" x2="30" y2="22" stroke="#8a6d3b" stroke-width="2"/>
+                <line x1="12" y1="24" x2="18" y2="28" stroke="#8a6d3b" stroke-width="2"/>
+                <line x1="22" y1="26" x2="34" y2="26" stroke="#8a6d3b" stroke-width="2"/>
+                <line x1="12" y1="32" x2="24" y2="32" stroke="#8a6d3b" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="timeline-year">בבל העתיקה</div>
+          </div>
+          <div class="timeline-body"><b>לפני כ-4,000 שנה</b> — לוחות חרס בבליים כללו טבלאות ריבועים וחזקות, ששימשו לחישובי שטחים וריבית. הרעיון של כפל חוזר של אותו מספר היה כבר שם, גם בלי סימון.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 48 48" width="32" height="32">
+                <circle cx="24" cy="20" r="14" fill="none" stroke="#2E5FA3" stroke-width="2"/>
+                <circle cx="18" cy="16" r="1.6" fill="#2E5FA3"/>
+                <circle cx="28" cy="14" r="1.6" fill="#2E5FA3"/>
+                <circle cx="24" cy="24" r="1.6" fill="#2E5FA3"/>
+                <circle cx="30" cy="22" r="1.6" fill="#2E5FA3"/>
+                <path d="M4 40 Q14 34 24 40 T44 40" fill="none" stroke="#F2941F" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <div class="timeline-year">ארכימדס</div>
+          </div>
+          <div class="timeline-body"><b>המאה ה-3 לפני הספירה</b> — המדען היווני כתב חיבור בשם "חושב גרגירי החול", שבו ניסה לענות על שאלה בסגנון דומה לזו שפתחנו איתה: כמה גרגירי חול יידרשו כדי למלא את כל היקום? כדי לתאר מספר כזה הוא פיתח שיטה שדומה מאוד לרעיון של חזקות גדולות.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 48 48" width="32" height="32">
+                <line x1="10" y1="10" x2="10" y2="38" stroke="#CBD5E3" stroke-width="2"/>
+                <line x1="10" y1="38" x2="38" y2="38" stroke="#CBD5E3" stroke-width="2"/>
+                <line x1="10" y1="24" x2="38" y2="24" stroke="#CBD5E3" stroke-width="1"/>
+                <line x1="24" y1="10" x2="24" y2="38" stroke="#CBD5E3" stroke-width="1"/>
+                <path d="M16 32 L34 14 L38 10 L36 16 L18 34 Z" fill="#F2941F"/>
+              </svg>
+            </div>
+            <div class="timeline-year">1637</div>
+          </div>
+          <div class="timeline-body"><b>רנה דקארט</b> — הפילוסוף והמתמטיקאי הצרפתי הוא זה שהציג בספרו "הגאומטריה" את הסימון שאנחנו משתמשים בו היום: ${katexSpan('x^2, x^3')} וכן הלאה. לפני כן, אנשים היו צריכים לכתוב את הכפל המלא כל פעם מחדש.</div>
+        </div>
+      </div>
+    `
+  },
+  {
+    tag:'קשר למציאות',
+    title:'איפה חזקות מסתתרות בחיים שלכם',
+    html: `
+      <p class="student-detail">לחצו על כל כרטיס כדי לעבור להדגמה שלו. בכל המקרים ההתחלה מתונה — אבל הכפלה חוזרת משנה את התמונה.</p>
+      <div class="life-grid">
+        ${lifeCard('cells','חלוקת תאים','תא אחד הופך לשניים, שניים לארבעה — וכך שוב ושוב.')}
+        ${lifeCard('money','ריבית דריבית','הרווח מצטרף לחיסכון, ובשנה הבאה גם הוא צובר ריבית.')}
+        ${lifeCard('memory','זיכרון במחשב',`יחידות זיכרון דיגיטליות מבוססות על חזקות של 2.`)}
+        ${lifeCard('viral','תוכן ויראלי','כל משתף מגיע לעוד אנשים, והקהל גדל מדור לדור.')}
+      </div>
+    `
+  },
+  {
+    tag:'קשר למציאות',
+    title:'בחרו תופעה — וראו את החזקה בפעולה',
+    html: `
+      <p class="student-detail">ארבעת הכרטיסים הם ארבעה סיפורים שונים של גדילה מעריכית. בחרו תופעה, שנו את הנתונים וראו כיצד הגרף מגיב.</p>
+      <div class="scenario-tabs" id="scenarioTabs"></div>
+      <div class="scenario-stage">
+        <div class="scenario-head">
+          <div class="scenario-mini" id="scenarioVisual"></div>
+          <div><div class="scenario-title" id="scenarioTitle"></div><div id="scenarioExplain"></div><div class="formula-pill" id="scenarioFormula"></div></div>
+        </div>
+      <div class="slider-row">
+          <div class="slabel"><span id="amountLabel"></span><span class="sval" id="intAmountVal"></span></div>
+          <input type="range" id="intAmount">
+      </div>
+      <div class="slider-row">
+          <div class="slabel"><span id="yearsLabel"></span><span class="sval" id="intYearsVal"></span></div>
+          <input type="range" id="intYears">
+      </div>
+      <div class="slider-row">
+          <div class="slabel"><span id="rateLabel"></span><span class="sval" id="intRateVal"></span></div>
+          <input type="range" id="intRate">
+      </div>
+      <div class="interest-result" id="intResult"></div>
+        <div class="chart-shell"><svg id="intChartSvg" viewBox="0 0 600 300"></svg></div>
+      </div>
+    `
+  },
+  {
+    tag:'רגע אינטראקטיבי',
+    title:'איזו הצעה הייתם בוחרים?',
+    html: `
+      <p>דמיינו שמציעים לכם לבחור בין שתי הצעות למשך חודש (30 ימים):</p>
+      <div class="compare-choice">
+        <div class="choice-card" data-choice="a"><div class="ct">הצעה א׳</div><div class="cd">1,000 ₪ בכל יום, קבוע<br><b>30,000 ₪ בחודש</b></div></div>
+        <div class="choice-card" data-choice="b"><div class="ct">הצעה ב׳</div><div class="cd">1 ₪ ביום הראשון — ומכפילים כל יום<br><b>לאן זה יגיע?</b></div></div>
+      </div>
+      <div class="choice-feedback" id="choiceFeedback">בחרו הצעה לפני שמתקדמים</div>
+      <div class="scale-toggle"><button class="scale-btn active" data-scale="log">לראות את כל התהליך</button><button class="scale-btn" data-scale="linear">להרגיש את הזינוק</button></div>
+      <div class="chart-shell"><svg id="chartSvg" viewBox="0 0 600 340"></svg></div>
+      <div class="chess-readout">
+        <div class="cur-sq" id="chartCurDay">עוד לא התחלנו</div>
+        <div class="cur-total" id="chartCurA"></div>
+        <div class="cur-total" id="chartCurB"></div>
+      </div>
+      <div class="chess-controls">
+        <button id="chartBack">▶ אחורה</button>
+        <button id="chartNext">היום הבא ◀</button>
+        <button id="chartJump">קפצו ליום 30 ◀◀</button>
+        <button id="chartReset">איפוס</button>
+      </div>
+    `
+  },
+  {
+    tag:'לסיכום',
+    title:'למה זה חשוב',
+    html: `
+      <p>חזקות הן לא רק כלל שמתרגלים בכיתה. הן הדרך שבה מספרים "מתפוצצים" — לטובה (חיסכון, טכנולוגיה) ולרעה (מגיפות, שמועות שיוצאות משליטה).</p>
+      <p>מי שמבין איך גדילה מעריכית מתנהגת, מבין משהו עמוק על העולם — למה דברים שנראים "איטיים בהתחלה" יכולים להפוך בפתאומיות לבלתי נשלטים, ולמה כדאי לפעמים לבחור באפשרות ה"צנועה" יותר.</p>
+      <div class="closing-note">וכל זה מתחיל בדבר אחד פשוט: להכפיל מספר בעצמו, שוב ושוב.</div>
+    `
+  },
+]; }
+
+/* ---------- shared chart tooltip (hover for mouse, tap for touch) ---------- */
+function ensureTooltip(){
+  let t = document.getElementById('chartTooltip');
+  if(!t){ t = document.createElement('div'); t.id='chartTooltip'; t.className='chart-tooltip'; document.body.appendChild(t); }
+  return t;
+}
+function showTooltip(evt, text){
+  const t = ensureTooltip();
+  t.textContent = text;
+  t.style.display = 'block';
+  t.style.left = evt.clientX + 'px';
+  t.style.top = evt.clientY + 'px';
+}
+function hideTooltip(){
+  const t = document.getElementById('chartTooltip');
+  if(t) t.style.display = 'none';
+}
+document.addEventListener('pointerover', e=>{
+  const dot = e.target.closest('.chart-dot');
+  if(dot) showTooltip(e, dot.getAttribute('data-label'));
+});
+document.addEventListener('pointermove', e=>{
+  const dot = e.target.closest('.chart-dot');
+  if(dot) showTooltip(e, dot.getAttribute('data-label'));
+});
+document.addEventListener('pointerout', e=>{
+  if(e.target.closest('.chart-dot')) hideTooltip();
+});
+document.addEventListener('click', e=>{
+  const dot = e.target.closest('.chart-dot');
+  if(dot) showTooltip(e, dot.getAttribute('data-label'));
+  else hideTooltip();
+});
+
+function formatCompact(n){
+  if(n>=1e9) return (n/1e9).toFixed(n>=1e10?0:1)+'B';
+  if(n>=1e6) return (n/1e6).toFixed(n>=1e7?0:1)+'M';
+  if(n>=1e3) return (n/1e3).toFixed(n>=1e4?0:1)+'K';
+  return String(Math.round(n));
+}
+
+/* ---------- interactive chessboard (step through 64 squares) ---------- */
+let chessRevealed = 0; // how many squares are currently revealed (0..64)
+
+function formatBigInt(n){
+  let s = n.toString();
+  let out = '';
+  let count = 0;
+  for(let i=s.length-1;i>=0;i--){
+    out = s[i] + out;
+    count++;
+    if(count%3===0 && i!==0) out = ',' + out;
+  }
+  return out;
+}
+
+function squareCellLabel(i){
+  const val = 2n ** BigInt(i);
+  if(val < 1000n) return katexSpan(val.toString());
+  return katexSpan(`2^{${i}}`);
+}
+
+function initChessBoard(){
+  const board = document.getElementById('chessBoard');
+  if(!board) return;
+  board.innerHTML = '';
+  for(let i=0;i<64;i++){
+    const row = Math.floor(i/8), col = i%8;
+    const cell = document.createElement('div');
+    cell.className = 'chess-cell ' + ((row+col)%2===0 ? 'light' : 'dark');
+    cell.id = 'sq-'+i;
+    board.appendChild(cell);
+  }
+  renderChessState();
+  const backBtn = document.getElementById('chessBack');
+  const nextBtn = document.getElementById('chessNext');
+  const jumpBtn = document.getElementById('chessJump');
+  const resetBtn = document.getElementById('chessReset');
+  if(backBtn) backBtn.onclick = ()=>{ if(chessRevealed>0){ chessRevealed--; renderChessState(); } };
+  if(nextBtn) nextBtn.onclick = ()=>{ if(chessRevealed<64){ chessRevealed++; renderChessState(); } };
+  if(jumpBtn) jumpBtn.onclick = ()=>{ chessRevealed = 64; renderChessState(); };
+  if(resetBtn) resetBtn.onclick = ()=>{ chessRevealed = 0; renderChessState(); };
+}
+
+function renderChessState(){
+  for(let i=0;i<64;i++){
+    const cell = document.getElementById('sq-'+i);
+    if(!cell) continue;
+    cell.classList.remove('filled','current');
+    if(i < chessRevealed){
+      cell.classList.add('filled');
+      cell.innerHTML = squareCellLabel(i);
+      if(i === chessRevealed-1) cell.classList.add('current');
+    } else {
+      cell.innerHTML = '';
+    }
+  }
+  const curSq = document.getElementById('chessCurSq');
+  const curVal = document.getElementById('chessCurVal');
+  const curTotal = document.getElementById('chessCurTotal');
+  if(!curSq) return;
+  if(chessRevealed===0){
+    curSq.textContent = 'עוד לא התחלנו';
+    curVal.textContent = '';
+    curTotal.textContent = '';
+  } else {
+    const idx = chessRevealed-1;
+    const val = 2n ** BigInt(idx);
+    const total = (2n ** BigInt(chessRevealed)) - 1n;
+    curSq.textContent = `משבצת מספר ${chessRevealed}`;
+    curVal.textContent = formatBigInt(val) + ' גרגירים';
+    curTotal.textContent = 'סך הכול על הלוח עד כה: ' + formatBigInt(total);
+  }
+  const backBtn = document.getElementById('chessBack');
+  const nextBtn = document.getElementById('chessNext');
+  if(backBtn) backBtn.disabled = chessRevealed===0;
+  if(nextBtn) nextBtn.disabled = chessRevealed===64;
+}
+
+/* ---------- compound interest simulator (sliders) ---------- */
+const SCENARIOS={
+  cells:{title:'חלוקת תאים',icon:'cells',explain:'אוכלוסיית תאים שמתרבה בכל מחזור.',amountLabel:'מספר תאים בהתחלה',amount:[1,20,1,2],yearsLabel:'מספר מחזורים',years:[1,14,1,8],rateLabel:'פי כמה בכל מחזור',rate:[1.2,3,.1,2],unit:'תאים',time:'מחזור',formula:'N = N₀ × qⁿ'},
+  money:{title:'ריבית דריבית',icon:'money',explain:'בכל שנה הריבית מחושבת גם על הרווח שכבר הצטבר.',amountLabel:'סכום התחלתי',amount:[100,10000,100,1000],yearsLabel:'מספר שנים',years:[1,40,1,20],rateLabel:'ריבית שנתית',rate:[1,8,.5,3],unit:'₪',time:'שנה',formula:'A = P × (1+r)ⁿ'},
+  memory:{title:'זיכרון במחשב',icon:'memory',explain:'כל סיבית נוספת מכפילה פי 2 את מספר המצבים האפשריים.',amountLabel:'מספר מצבים התחלתי',amount:[1,8,1,1],yearsLabel:'מספר סיביות',years:[1,20,1,10],rateLabel:'בסיס החזקה',rate:[2,2,1,2],unit:'מצבים',time:'סיבית',formula:'מצבים = 2ⁿ'},
+  viral:{title:'תוכן ויראלי',icon:'viral',explain:'כל אדם מעביר את התוכן לכמה אנשים נוספים.',amountLabel:'אנשים בתחילת הדרך',amount:[1,20,1,1],yearsLabel:'מספר סבבי שיתוף',years:[1,12,1,7],rateLabel:'שיתופים מכל אדם',rate:[2,6,1,3],unit:'אנשים',time:'סבב',formula:'קהל = התחלה × שיתופיםⁿ'}
+};
+let intState = {scenario:'money',amount:1000, years:20, rate:3};
+
+function setRange(el,arr){ [el.min,el.max,el.step,el.value]=arr; }
+function chooseScenario(key){
+  const s=SCENARIOS[key]; if(!s)return;
+  intState={scenario:key,amount:s.amount[3],years:s.years[3],rate:s.rate[3]};
+  document.querySelectorAll('.scenario-tab').forEach(b=>b.classList.toggle('active',b.dataset.scenario===key));
+  document.querySelectorAll('.life-card').forEach(b=>b.classList.toggle('active',b.dataset.scenario===key));
+  document.getElementById('scenarioTitle').textContent=s.title;
+  document.getElementById('scenarioExplain').textContent=s.explain;
+  document.getElementById('scenarioFormula').textContent=s.formula;
+  document.getElementById('scenarioVisual').innerHTML=visualSvg(s.icon);
+  document.getElementById('amountLabel').textContent=s.amountLabel;
+  document.getElementById('yearsLabel').textContent=s.yearsLabel;
+  document.getElementById('rateLabel').textContent=s.rateLabel;
+  setRange(document.getElementById('intAmount'),s.amount);
+  setRange(document.getElementById('intYears'),s.years);
+  setRange(document.getElementById('intRate'),s.rate);
+  renderInterestState();
+}
+
+function initInterest(){
+  const amountEl = document.getElementById('intAmount');
+  const yearsEl = document.getElementById('intYears');
+  const rateEl = document.getElementById('intRate');
+  if(!amountEl) return;
+  const tabs=document.getElementById('scenarioTabs');
+  tabs.innerHTML=Object.entries(SCENARIOS).map(([k,s])=>`<button class="scenario-tab" data-scenario="${k}">${s.title}</button>`).join('');
+  tabs.querySelectorAll('button').forEach(b=>b.onclick=()=>chooseScenario(b.dataset.scenario));
+  document.querySelectorAll('.life-card').forEach(b=>b.onclick=()=>{
+    const target=document.getElementById('scenarioTabs'); if(target){chooseScenario(b.dataset.scenario);target.scrollIntoView({behavior:'smooth',block:'center'});}
+  });
+  amountEl.oninput = ()=>{ intState.amount = parseInt(amountEl.value,10); renderInterestState(); };
+  yearsEl.oninput = ()=>{ intState.years = parseInt(yearsEl.value,10); renderInterestState(); };
+  rateEl.oninput = ()=>{ intState.rate = parseFloat(rateEl.value); renderInterestState(); };
+  chooseScenario(intState.scenario);
+}
+
+function renderInterestState(){
+  const amountVal = document.getElementById('intAmountVal');
+  const yearsVal = document.getElementById('intYearsVal');
+  const rateVal = document.getElementById('intRateVal');
+  const resultEl = document.getElementById('intResult');
+  const svg = document.getElementById('intChartSvg');
+  if(!amountVal) return;
+  const s=SCENARIOS[intState.scenario];
+  amountVal.textContent = intState.amount.toLocaleString() + (intState.scenario==='money'?' ₪':'');
+  yearsVal.textContent = intState.years;
+  rateVal.textContent = intState.scenario==='money'?intState.rate+'%':'×'+intState.rate;
+
+  const multiplier = intState.scenario==='money' ? 1 + intState.rate/100 : (intState.scenario==='memory'?2:intState.rate);
+  const final = intState.amount * Math.pow(multiplier, intState.years);
+  const suffix=s.unit==='₪'?' ₪':' '+s.unit;
+  resultEl.innerHTML = `אחרי ${intState.years} ${s.time}${intState.years>1?'ים':''}: <span class="ltr-num">${Math.round(final).toLocaleString()}${suffix}</span>`;
+
+  const W=600,H=300,padL=64,padR=20,padT=20,padB=44;
+  const totalYears = intState.years;
+  const maxVal = Math.max(1, intState.amount * Math.pow(multiplier, totalYears));
+  const xFor = y => padL + (y/totalYears) * (W-padL-padR);
+  const yFor = v => H-padB - (v/maxVal) * (H-padT-padB);
+
+  let pts = [];
+  for(let y=0; y<=totalYears; y++){
+    const val = intState.amount * Math.pow(multiplier, y);
+    pts.push({x:xFor(y), y:yFor(val), year:y, val});
+  }
+  const path = 'M ' + pts.map(p=>p.x+' '+p.y).join(' L ');
+  const dots = pts.map(p=>
+    `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="4.5" fill="#2E9E5B" stroke="#fff" stroke-width="1.5"
+      data-label="${s.time} ${p.year}: ${Math.round(p.val).toLocaleString()}${suffix}"/>`
+  ).join('');
+
+  let yGrid='';
+  for(let f=0; f<=4; f++){
+    const v = maxVal*f/4;
+    const yy = yFor(v);
+    yGrid += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#E3E9F2" stroke-width="1"/>`;
+    yGrid += `<text x="${padL-10}" y="${yy+4}" font-size="11" fill="#5B6B82" text-anchor="end">${f===0?'0':'₪'+formatCompact(v)}</text>`;
+  }
+  let xTicks='';
+  const step = Math.max(1, Math.round(totalYears/6));
+  for(let y=0; y<=totalYears; y+=step){
+    const xx = xFor(y);
+    xTicks += `<line x1="${xx}" y1="${H-padB}" x2="${xx}" y2="${H-padB+5}" stroke="#CBD5E3" stroke-width="1.5"/>`;
+    xTicks += `<text x="${xx}" y="${H-padB+20}" font-size="11" fill="#5B6B82" text-anchor="middle">${y}</text>`;
+  }
+
+  svg.innerHTML = `
+    ${yGrid}
+    <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#94A3B8" stroke-width="1.5"/>
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#94A3B8" stroke-width="1.5"/>
+    ${xTicks}
+    <text x="${(padL+W-padR)/2}" y="${H-4}" font-size="12" fill="#5B6B82" text-anchor="middle">${s.time}ים</text>
+    <path d="${path}" fill="none" stroke="#2E9E5B" stroke-width="2.5"/>
+    ${dots}
+  `;
+}
+
+/* ---------- interactive growth chart (step through 30 days) ---------- */
+let chartDay = 0; // 0..30, how many days are currently plotted
+let chartScale = 'log';
+
+function initChart(){
+  const svg = document.getElementById('chartSvg');
+  if(!svg) return;
+  document.querySelectorAll('.choice-card').forEach(card=>card.onclick=()=>{
+    document.querySelectorAll('.choice-card').forEach(c=>c.classList.toggle('selected',c===card));
+    const f=document.getElementById('choiceFeedback');
+    f.textContent=card.dataset.choice==='a'?'בחירה הגיונית מאוד — היא נראית גדולה ובטוחה. עכשיו נבדוק.':'בחירה אמיצה — בהתחלה היא כמעט לא שווה דבר. עכשיו נבדוק.';
+  });
+  document.querySelectorAll('.scale-btn').forEach(btn=>btn.onclick=()=>{
+    chartScale=btn.dataset.scale;
+    document.querySelectorAll('.scale-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    renderChartState();
+  });
+  renderChartState();
+  const backBtn = document.getElementById('chartBack');
+  const nextBtn = document.getElementById('chartNext');
+  const jumpBtn = document.getElementById('chartJump');
+  const resetBtn = document.getElementById('chartReset');
+  if(backBtn) backBtn.onclick = ()=>{ if(chartDay>0){ chartDay--; renderChartState(); } };
+  if(nextBtn) nextBtn.onclick = ()=>{ if(chartDay<30){ chartDay++; renderChartState(); } };
+  if(jumpBtn) jumpBtn.onclick = ()=>{ chartDay = 30; renderChartState(); };
+  if(resetBtn) resetBtn.onclick = ()=>{ chartDay = 0; renderChartState(); };
+}
+
+function renderChartState(){
+  const svg = document.getElementById('chartSvg');
+  if(!svg) return;
+  const W=600,H=340,padL=64,padR=20,padT=20,padB=44;
+  const totalDays=30;
+  const maxVal = Math.pow(2,totalDays)-1; // fixed final scale, so growth is comparable day to day
+  const xFor = d => padL + (d-1)/(totalDays-1) * (W-padL-padR);
+  const yFor = v => H-padB - (chartScale==='log' ? Math.log10(v+1)/Math.log10(maxVal+1) : v/maxVal) * (H-padT-padB);
+
+  let flatPts = [], expPts = [];
+  for(let d=1; d<=chartDay; d++){
+    flatPts.push({x:xFor(d), y:yFor(1000*d), day:d, val:1000*d});
+    expPts.push({x:xFor(d), y:yFor(Math.pow(2,d)-1), day:d, val:Math.pow(2,d)-1});
+  }
+  const toPath = pts => pts.length ? 'M ' + pts.map(p=>p.x+' '+p.y).join(' L ') : '';
+  const toDots = (pts,color,name) => pts.map(p=>
+    `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="5" fill="${color}" stroke="#fff" stroke-width="1.5"
+      data-label="${name} · יום ${p.day}: ${Math.round(p.val).toLocaleString()} ₪"/>`
+  ).join('');
+
+  // y-axis gridlines at 0/25/50/75/100%
+  let yGrid = '';
+  for(let f=0; f<=4; f++){
+    const v = chartScale==='log' ? Math.pow(maxVal+1,f/4)-1 : maxVal*f/4;
+    const y = yFor(v);
+    yGrid += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#E3E9F2" stroke-width="1"/>`;
+    yGrid += `<text x="${padL-10}" y="${y+4}" font-size="11" fill="#5B6B82" text-anchor="end">${f===0?'0':'₪'+formatCompact(v)}</text>`;
+  }
+  // x-axis ticks every 5 days
+  let xTicks = '';
+  for(let d=1; d<=totalDays; d+=(d===1?4:5)){
+    const x = xFor(d);
+    xTicks += `<line x1="${x}" y1="${H-padB}" x2="${x}" y2="${H-padB+5}" stroke="#CBD5E3" stroke-width="1.5"/>`;
+    xTicks += `<text x="${x}" y="${H-padB+20}" font-size="11" fill="#5B6B82" text-anchor="middle">${d}</text>`;
+  }
+
+  svg.innerHTML = `
+    ${yGrid}
+    <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#94A3B8" stroke-width="1.5"/>
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#94A3B8" stroke-width="1.5"/>
+    ${xTicks}
+    <text x="${(padL+W-padR)/2}" y="${H-4}" font-size="12" fill="#5B6B82" text-anchor="middle">יום בחודש</text>
+    <text x="${W-padR}" y="${padT+8}" font-size="11" fill="#718096" text-anchor="end">${chartScale==='log'?'סקאלה לוגריתמית — גם ההתחלה נראית':'סקאלה רגילה — הזינוק האמיתי בסוף'}</text>
+    <circle cx="${padL+10}" cy="${padT+4}" r="5" fill="#F2941F"/>
+    <text x="${padL+22}" y="${padT+8}" font-size="12" fill="#5B6B82">הצעה א׳ (1,000 ₪/יום, מצטבר)</text>
+    <circle cx="${padL+10}" cy="${padT+24}" r="5" fill="#2E5FA3"/>
+    <text x="${padL+22}" y="${padT+28}" font-size="12" fill="#5B6B82">הצעה ב׳ (הכפלה יומית, מצטבר)</text>
+    <path d="${toPath(flatPts)}" fill="none" stroke="#F2941F" stroke-width="2.5"/>
+    <path d="${toPath(expPts)}" fill="none" stroke="#2E5FA3" stroke-width="2.5"/>
+    ${toDots(flatPts,'#F2941F','הצעה א׳')}
+    ${toDots(expPts,'#2E5FA3','הצעה ב׳')}
+  `;
+
+  const curDay = document.getElementById('chartCurDay');
+  const curA = document.getElementById('chartCurA');
+  const curB = document.getElementById('chartCurB');
+  if(!curDay) return;
+  if(chartDay===0){
+    curDay.textContent = 'עוד לא התחלנו';
+    curA.textContent = ''; curB.textContent = '';
+  } else {
+    const aTotal = 1000*chartDay;
+    const bToday = Math.pow(2,chartDay-1);
+    const bTotal = Math.pow(2,chartDay)-1;
+    curDay.textContent = `יום ${chartDay}`;
+    curA.textContent = `הצעה א׳ — סך הכול עד היום: ${aTotal.toLocaleString()} ₪`;
+    curB.textContent = `הצעה ב׳ — היום: ${bToday.toLocaleString()} ₪ · סך הכול עד היום: ${bTotal.toLocaleString()} ₪`;
+  }
+  const backBtn = document.getElementById('chartBack');
+  const nextBtn = document.getElementById('chartNext');
+  if(backBtn) backBtn.disabled = chartDay===0;
+  if(nextBtn) nextBtn.disabled = chartDay===30;
+}
+
+/* ---------- reveal buttons (used for the grain-total reveal only) ---------- */
+function wireReveal(btnId, contentId){
+  const btn = document.getElementById(btnId);
+  const content = document.getElementById(contentId);
+  if(!btn || !content) return;
+  btn.addEventListener('click', ()=>{
+    content.classList.add('shown');
+    btn.style.display = 'none';
+  });
+}
+
+/* ---------- student (scroll) mode ---------- */
+function renderStudentMode(){
+  const wrap = document.getElementById('studentWrap');
+  wrap.innerHTML = SECTIONS.map(s => `
+    <div class="story-section">
+      <div class="sec-tag">${s.tag}</div>
+      <h2>${s.title}</h2>
+      ${s.html}
+    </div>
+  `).join('');
+  initChessBoard();
+  initChart();
+  initInterest();
+  wireReveal('revealTotal','revealTotalContent');
+}
+
+/* ---------- teacher (presenter) mode ---------- */
+let currentSlide = 0;
+function renderPresenterSlide(){
+  const el = document.getElementById('presenterSlide');
+  const s = SECTIONS[currentSlide];
+  el.innerHTML = `
+    <div class="presenter-slide">
+      <div class="sec-tag">${s.tag}</div>
+      <h2>${s.title}</h2>
+      ${s.html}
+    </div>
+  `;
+  initChessBoard();
+  initChart();
+  initInterest();
+  wireReveal('revealTotal','revealTotalContent');
+
+  document.getElementById('slideCounter').textContent = `${currentSlide+1} מתוך ${SECTIONS.length}`;
+  document.getElementById('prevSlide').disabled = currentSlide===0;
+  document.getElementById('nextSlide').disabled = currentSlide===SECTIONS.length-1;
+  const dots = document.getElementById('presenterDots');
+  dots.innerHTML = SECTIONS.map((_,i)=>`<div class="dot ${i===currentSlide?'on':''}"></div>`).join('');
+}
+document.getElementById('prevSlide').addEventListener('click', ()=>{
+  if(currentSlide>0){ currentSlide--; renderPresenterSlide(); }
+});
+document.getElementById('nextSlide').addEventListener('click', ()=>{
+  if(currentSlide<SECTIONS.length-1){ currentSlide++; renderPresenterSlide(); }
+});
+document.addEventListener('keydown',(e)=>{
+  if(!document.getElementById('presenterWrap').classList.contains('active')) return;
+  if(e.key==='ArrowLeft') document.getElementById('nextSlide').click(); // left = forward
+  if(e.key==='ArrowRight') document.getElementById('prevSlide').click(); // right = back
+});
+
+/* ---------- mode switch ---------- */
+function setMode(mode){
+  const studentWrap = document.getElementById('studentWrap');
+  const presenterWrap = document.getElementById('presenterWrap');
+  document.getElementById('btnStudent').classList.toggle('active', mode==='student');
+  document.getElementById('btnTeacher').classList.toggle('active', mode==='teacher');
+  if(mode==='student'){
+    presenterWrap.classList.remove('active');
+    studentWrap.style.display = '';
+    renderStudentMode();
+  } else {
+    // Remove the student DOM entirely: duplicated interactive IDs would otherwise
+    // make the charts and chessboard render inside the hidden student view.
+    studentWrap.innerHTML = '';
+    studentWrap.style.display = 'none';
+    presenterWrap.classList.add('active');
+    currentSlide = 0;
+    renderPresenterSlide();
+  }
+}
+document.getElementById('btnStudent').addEventListener('click', ()=>setMode('student'));
+document.getElementById('btnTeacher').addEventListener('click', ()=>setMode('teacher'));
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  katexAvailable = await waitForKatex(5000);
+  SECTIONS = buildSections();
+  setMode('student');
+});
+</script>
+</body>
+</html>
