@@ -132,6 +132,10 @@
   .scale-toggle{display:flex;justify-content:center;gap:8px;margin:8px 0 2px}
   .scale-btn{border:1px solid #cdd8e6;background:#fff;color:var(--blue-primary);border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;cursor:pointer}
   .scale-btn.active{background:var(--blue-primary);color:#fff}
+  .chart-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:4px 8px 10px;color:var(--text-muted);font-size:.88rem;font-weight:700}
+  .chart-legend{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .legend-line{width:28px;height:4px;border-radius:99px;display:inline-block}
   .choice-card{cursor:pointer;transition:.2s ease;position:relative;overflow:hidden}
   .choice-card::before{content:'';display:block;height:8px;margin:-18px -18px 14px;background:var(--gray-step)}
   .choice-card[data-choice="a"]::before{background:var(--orange)}
@@ -177,6 +181,7 @@
   .choice-card .ct{font-weight:800; color:var(--blue-deep); margin-bottom:6px;}
   .choice-card .cd{font-size:.9rem; color:var(--text-muted);}
   #chartSvg{width:100%; height:auto; margin-top:10px;}
+  #chartSvg,#intChartSvg{direction:ltr;unicode-bidi:isolate;display:block}
   .chart-dot{cursor:pointer;}
   .chart-tooltip{
     position:fixed; pointer-events:none; background:var(--blue-deep); color:#fff; padding:7px 12px; border-radius:9px;
@@ -203,12 +208,15 @@
   }
   .presenter-slide .student-detail{display:none}
   .presenter-slide>p{display:none}
-  .presenter-slide .timeline{display:grid;grid-template-columns:repeat(3,1fr)}
+  .presenter-slide .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   .presenter-slide .timeline-item{grid-template-columns:1fr;padding:14px}
   .presenter-slide .timeline-meta{width:100%;flex-basis:auto}
+  .presenter-slide .timeline-icon{height:220px}
   .presenter-slide .timeline-body{font-size:1rem;line-height:1.55;text-align:center}
   .presenter-slide .life-grid{grid-template-columns:repeat(4,1fr)}
-  .presenter-slide .life-visual{height:150px}
+  .presenter-slide .life-visual{height:230px}
+  .presenter-slide .story-image{max-height:460px;object-position:center}
+  .presenter-slide .scenario-mini{width:190px;height:125px}
   .presenter-slide .life-card .d{display:none}
   .presenter-slide .scenario-stage{padding:14px}
   .presenter-slide .sec-tag{align-self:flex-start;}
@@ -470,7 +478,13 @@ function buildSections(){ return [
       </div>
       <div class="choice-feedback" id="choiceFeedback">בחרו הצעה לפני שמתקדמים</div>
       <div class="scale-toggle"><button class="scale-btn active" data-scale="log">לראות את כל התהליך</button><button class="scale-btn" data-scale="linear">להרגיש את הזינוק</button></div>
-      <div class="chart-shell"><svg id="chartSvg" viewBox="0 0 600 340"></svg></div>
+      <div class="chart-shell">
+        <div class="chart-meta">
+          <div class="chart-legend"><span class="legend-item"><i class="legend-line" style="background:#F2941F"></i>הצעה א׳ — 1,000 ₪ ביום</span><span class="legend-item"><i class="legend-line" style="background:#2E5FA3"></i>הצעה ב׳ — הכפלה יומית</span></div>
+          <span id="chartScaleNote">סקאלה לוגריתמית — גם תחילת התהליך נראית</span>
+        </div>
+        <svg id="chartSvg" viewBox="0 0 600 340"></svg>
+      </div>
       <div class="chess-readout">
         <div class="cur-sq" id="chartCurDay">עוד לא התחלנו</div>
         <div class="cur-total" id="chartCurA"></div>
@@ -535,9 +549,18 @@ function formatCompact(n){
   if(n>=1e3) return (n/1e3).toFixed(n>=1e4?0:1)+'K';
   return String(Math.round(n));
 }
+function formatScenarioAxis(n, scenario){
+  const compact=formatCompact(n);
+  if(scenario==='money') return '₪'+compact;
+  const units={cells:' תאים',memory:' מצבים',viral:' אנשים'};
+  return compact+(units[scenario]||'');
+}
 
 /* ---------- interactive chessboard (step through 64 squares) ---------- */
-let chessRevealed = 0; // how many squares are currently revealed (0..64)
+let activeMode = 'student';
+const chessState = {student:0, teacher:0};
+function getChessRevealed(){ return chessState[activeMode]; }
+function setChessRevealed(value){ chessState[activeMode]=Math.max(0,Math.min(64,value)); }
 
 function formatBigInt(n){
   let s = n.toString();
@@ -573,13 +596,14 @@ function initChessBoard(){
   const nextBtn = document.getElementById('chessNext');
   const jumpBtn = document.getElementById('chessJump');
   const resetBtn = document.getElementById('chessReset');
-  if(backBtn) backBtn.onclick = ()=>{ if(chessRevealed>0){ chessRevealed--; renderChessState(); } };
-  if(nextBtn) nextBtn.onclick = ()=>{ if(chessRevealed<64){ chessRevealed++; renderChessState(); } };
-  if(jumpBtn) jumpBtn.onclick = ()=>{ chessRevealed = 64; renderChessState(); };
-  if(resetBtn) resetBtn.onclick = ()=>{ chessRevealed = 0; renderChessState(); };
+  if(backBtn) backBtn.onclick = ()=>{ const n=getChessRevealed(); if(n>0){ setChessRevealed(n-1); renderChessState(); } };
+  if(nextBtn) nextBtn.onclick = ()=>{ const n=getChessRevealed(); if(n<64){ setChessRevealed(n+1); renderChessState(); } };
+  if(jumpBtn) jumpBtn.onclick = ()=>{ setChessRevealed(64); renderChessState(); };
+  if(resetBtn) resetBtn.onclick = ()=>{ setChessRevealed(0); renderChessState(); };
 }
 
 function renderChessState(){
+  const chessRevealed=getChessRevealed();
   for(let i=0;i<64;i++){
     const cell = document.getElementById('sq-'+i);
     if(!cell) continue;
@@ -676,7 +700,7 @@ function renderInterestState(){
   const suffix=s.unit==='₪'?' ₪':' '+s.unit;
   resultEl.innerHTML = `אחרי ${intState.years} ${s.time}${intState.years>1?'ים':''}: <span class="ltr-num">${Math.round(final).toLocaleString()}${suffix}</span>`;
 
-  const W=600,H=300,padL=64,padR=20,padT=20,padB=44;
+  const W=600,H=300,padL=92,padR=20,padT=20,padB=44;
   const totalYears = intState.years;
   const maxVal = Math.max(1, intState.amount * Math.pow(multiplier, totalYears));
   const xFor = y => padL + (y/totalYears) * (W-padL-padR);
@@ -698,7 +722,7 @@ function renderInterestState(){
     const v = maxVal*f/4;
     const yy = yFor(v);
     yGrid += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#E3E9F2" stroke-width="1"/>`;
-    yGrid += `<text x="${padL-10}" y="${yy+4}" font-size="11" fill="#5B6B82" text-anchor="end">${f===0?'0':'₪'+formatCompact(v)}</text>`;
+    yGrid += `<text x="${padL-10}" y="${yy+4}" font-size="11" fill="#5B6B82" text-anchor="end">${f===0?'0':formatScenarioAxis(v,intState.scenario)}</text>`;
   }
   let xTicks='';
   const step = Math.max(1, Math.round(totalYears/6));
@@ -750,7 +774,7 @@ function initChart(){
 function renderChartState(){
   const svg = document.getElementById('chartSvg');
   if(!svg) return;
-  const W=600,H=340,padL=64,padR=20,padT=20,padB=44;
+  const W=600,H=340,padL=82,padR=20,padT=20,padB=44;
   const totalDays=30;
   const maxVal = Math.pow(2,totalDays)-1; // fixed final scale, so growth is comparable day to day
   const xFor = d => padL + (d-1)/(totalDays-1) * (W-padL-padR);
@@ -789,16 +813,13 @@ function renderChartState(){
     <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#94A3B8" stroke-width="1.5"/>
     ${xTicks}
     <text x="${(padL+W-padR)/2}" y="${H-4}" font-size="12" fill="#5B6B82" text-anchor="middle">יום בחודש</text>
-    <text x="${W-padR}" y="${padT+8}" font-size="11" fill="#718096" text-anchor="end">${chartScale==='log'?'סקאלה לוגריתמית — גם ההתחלה נראית':'סקאלה רגילה — הזינוק האמיתי בסוף'}</text>
-    <circle cx="${padL+10}" cy="${padT+4}" r="5" fill="#F2941F"/>
-    <text x="${padL+22}" y="${padT+8}" font-size="12" fill="#5B6B82">הצעה א׳ (1,000 ₪/יום, מצטבר)</text>
-    <circle cx="${padL+10}" cy="${padT+24}" r="5" fill="#2E5FA3"/>
-    <text x="${padL+22}" y="${padT+28}" font-size="12" fill="#5B6B82">הצעה ב׳ (הכפלה יומית, מצטבר)</text>
     <path d="${toPath(flatPts)}" fill="none" stroke="#F2941F" stroke-width="2.5"/>
     <path d="${toPath(expPts)}" fill="none" stroke="#2E5FA3" stroke-width="2.5"/>
     ${toDots(flatPts,'#F2941F','הצעה א׳')}
     ${toDots(expPts,'#2E5FA3','הצעה ב׳')}
   `;
+  const scaleNote=document.getElementById('chartScaleNote');
+  if(scaleNote) scaleNote.textContent=chartScale==='log'?'סקאלה לוגריתמית — גם תחילת התהליך נראית':'סקאלה רגילה — הזינוק בסוף בולט';
 
   const curDay = document.getElementById('chartCurDay');
   const curA = document.getElementById('chartCurA');
@@ -885,6 +906,7 @@ document.addEventListener('keydown',(e)=>{
 
 /* ---------- mode switch ---------- */
 function setMode(mode){
+  activeMode = mode;
   const studentWrap = document.getElementById('studentWrap');
   const presenterWrap = document.getElementById('presenterWrap');
   document.getElementById('btnStudent').classList.toggle('active', mode==='student');
